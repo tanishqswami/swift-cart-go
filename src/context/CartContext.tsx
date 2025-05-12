@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { CartItem, Product } from "@/types/database";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CartContextType {
   cartItems: CartItem[];
