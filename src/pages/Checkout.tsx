@@ -5,6 +5,7 @@ import { useCart } from "@/context/CartContext";
 import CartSummary from "@/components/CartSummary";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Checkout: React.FC = () => {
   const { cartItems, getTotalPrice, clearCart } = useCart();
@@ -25,8 +26,19 @@ const Checkout: React.FC = () => {
       // Simulating payment process
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      // Create order in database
+      const { error } = await supabase
+        .from('orders')
+        .insert({
+          cart_items: JSON.stringify(cartItems),
+          total_price: getTotalPrice() * 1.1, // Including tax
+          payment_status: 'completed'
+        });
+      
+      if (error) throw error;
+      
       // After successful payment
-      clearCart();
+      await clearCart();
       navigate("/thank-you");
     } catch (error) {
       console.error("Payment error:", error);
