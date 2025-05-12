@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { getProductByBarcode } from "@/services/productService";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const BarcodeScanner: React.FC = () => {
   const [scanning, setScanning] = useState(false);
   const [html5QrCode, setHtml5QrCode] = useState<Html5Qrcode | null>(null);
   const { addToCart } = useCart();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Initialize scanner instance
@@ -28,7 +30,14 @@ const BarcodeScanner: React.FC = () => {
     if (!html5QrCode) return;
 
     setScanning(true);
-    const config = { fps: 10, qrbox: 250 };
+    
+    // Adjust qrbox size based on device
+    const qrboxSize = isMobile ? { width: 250, height: 250 } : 250;
+    
+    const config = { 
+      fps: 10, 
+      qrbox: qrboxSize 
+    };
 
     html5QrCode
       .start(
@@ -96,13 +105,17 @@ const BarcodeScanner: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center p-4">
-      <div id="reader" className="w-full max-w-sm h-64 mb-4"></div>
+      <div 
+        id="reader" 
+        className="w-full max-w-sm h-64 mb-4 rounded overflow-hidden border border-gray-200"
+      ></div>
       
       <div className="w-full flex justify-center mt-4">
         {!scanning ? (
           <Button 
             onClick={startScanning}
             className="bg-blue-500 hover:bg-blue-600"
+            size="lg"
           >
             Start Scanning
           </Button>
@@ -110,6 +123,7 @@ const BarcodeScanner: React.FC = () => {
           <Button 
             onClick={stopScanning}
             variant="destructive"
+            size="lg"
           >
             Stop Scanning
           </Button>

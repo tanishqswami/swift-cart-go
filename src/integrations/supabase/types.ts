@@ -67,22 +67,28 @@ export type Database = {
           barcode: string
           id: string
           image_url: string
+          location: string | null
           name: string
           price: number
+          weight: number | null
         }
         Insert: {
           barcode: string
           id?: string
           image_url: string
+          location?: string | null
           name: string
           price: number
+          weight?: number | null
         }
         Update: {
           barcode?: string
           id?: string
           image_url?: string
+          location?: string | null
           name?: string
           price?: number
+          weight?: number | null
         }
         Relationships: []
       }
