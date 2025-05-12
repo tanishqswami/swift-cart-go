@@ -1,17 +1,23 @@
-
 export interface Product {
   id: string;
   name: string;
   price: number;
+  weight: number; // Weight in grams
   barcode: string;
-  image_url: string;
+  image_url?: string;
+  description?: string;
+  category?: string;
+  stock?: number;
+  location?: string; // Location in the store
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CartItem {
   id: string;
   product_id: string;
+  product: Product;
   quantity: number;
-  product?: Product;
   timestamp: string;
 }
 

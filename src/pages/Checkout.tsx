@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
@@ -6,15 +5,22 @@ import CartSummary from "@/components/CartSummary";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import WeightChecker from '@/components/WeightChecker';
 
 const Checkout: React.FC = () => {
   const { cartItems, getTotalPrice, clearCart } = useCart();
   const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);
+  const [isWeightVerified, setIsWeightVerified] = useState(false);
 
   // This is a mock implementation for now
   // Will be replaced with Stripe integration
   const handlePayment = async () => {
+    if (!isWeightVerified) {
+      toast.error('Please verify the weight before proceeding with payment');
+      return;
+    }
+
     if (cartItems.length === 0) {
       toast.error("Your cart is empty");
       return;
@@ -53,54 +59,36 @@ const Checkout: React.FC = () => {
       <div className="p-4">
         <h1 className="text-2xl font-bold mb-6">Checkout</h1>
         
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-1">
-            <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-              <h2 className="font-semibold mb-4">Order Summary</h2>
-              
-              {cartItems.length === 0 ? (
-                <p className="text-gray-500">Your cart is empty</p>
-              ) : (
-                <div className="space-y-3">
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="flex justify-between py-2 border-b">
-                      <div className="flex items-center">
-                        <img
-                          src={item.product?.image_url}
-                          alt={item.product?.name}
-                          className="h-10 w-10 object-cover rounded mr-3"
-                        />
-                        <span>{item.product?.name} × {item.quantity}</span>
-                      </div>
-                      <span className="font-medium">
-                        ${((item.product?.price || 0) * item.quantity).toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+            <div className="space-y-2">
+              {cartItems.map((item) => (
+                <div key={item.id} className="flex justify-between">
+                  <span>{item.product.name} x {item.quantity}</span>
+                  <span>₹{(item.product.price * item.quantity).toFixed(2)}</span>
                 </div>
-              )}
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h2 className="font-semibold mb-4">Payment Method</h2>
-              <p className="text-gray-600 mb-4">
-                This is a demo checkout. In a real implementation, 
-                Stripe would be integrated here.
-              </p>
-              
-              <Button
-                onClick={handlePayment}
-                className="w-full bg-blue-500 hover:bg-blue-600"
-                disabled={cartItems.length === 0 || processing}
-              >
-                {processing ? "Processing..." : "Pay Now"}
-              </Button>
+              ))}
+              <div className="border-t pt-2 mt-2">
+                <div className="flex justify-between font-bold">
+                  <span>Total:</span>
+                  <span>₹{getTotalPrice().toFixed(2)}</span>
+                </div>
+              </div>
             </div>
           </div>
           
-          <div className="md:w-80">
-            <CartSummary />
-          </div>
+          <WeightChecker onWeightVerified={setIsWeightVerified} />
+        </div>
+        
+        <div className="mt-6 flex justify-center">
+          <Button
+            onClick={handlePayment}
+            disabled={!isWeightVerified || cartItems.length === 0 || processing}
+            className="w-full md:w-auto px-8 py-2"
+          >
+            {processing ? "Processing..." : isWeightVerified ? "Proceed to Payment" : "Weight Verification Required"}
+          </Button>
         </div>
       </div>
     </div>
